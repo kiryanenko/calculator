@@ -39,38 +39,32 @@ sub rpn {
 		'^'  => 4
 	);
 
-	my @stack = ();		# стэк операций
-	my $prev = '';		# предыдущая операция
+	my @stack = ('');		# стек операций
 	for (@$source) {
 		if (/\d/) { push @rpn, $_; }
 		elsif ($_ eq ')') {
-			if ($prev eq '(') { 
-				$prev = pop @stack; 
+			if ($stack[0] eq '(') { 
+				shift @stack; 
 			} else { 
-				push @rpn, $prev;  
-				$prev = pop @stack;
+				push @rpn, shift @stack;
 				redo;
 			}
 		}
-		elsif (!$priority{$prev} || $_ eq '(' || 
-			$priority{$prev} < $priority{$_} || $priority{$_} == 3) { 
-			push @stack, $prev;
-			$prev = $_; 
+		elsif (!$priority{$stack[0]} || $_ eq '(' || 
+			$priority{$stack[0]} < $priority{$_} || $priority{$_} == 3) { 
+			unshift @stack, $_; 
 		}
-		elsif ($priority{$prev} == $priority{$_}) { 
-			push @rpn, $prev;  
-			$prev = $_;
+		elsif ($priority{$stack[0]} == $priority{$_}) { 
+			push @rpn, $stack[0];  
+			$stack[0] = $_;
 		}
-		elsif ($priority{$prev} > $priority{$_}) {
-			push @rpn, $prev;  
-			$prev = pop @stack;
+		elsif ($priority{$stack[0]} > $priority{$_}) {
+			push @rpn, shift @stack;
 			redo;
 		}
 	}
-	if ($prev) {
-		shift @stack;
-		@rpn = (@rpn, $prev, reverse  @stack);
-	}
+	pop @stack;
+	push @rpn, @stack;
 
 	return \@rpn;
 }
