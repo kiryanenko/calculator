@@ -49,8 +49,7 @@ sub tokenize {
 			when ('(') { $nBrackets++; }
 			when (')') { $nBrackets--; }
 			when (m{^[\*/^]$} && $prev =~ /\d|\)/) { }
-			when (/\d/ && $_ =~ /^\d*\.?\d*e?[\+-]?\d*$/ && 
-				($prev eq '' || $prev !~ /\d/)) { $_ = 0+$_ }
+			when (/^\d*\.?\d*(?<=\d|\.)(e?[\+-]?\d+)?$/ && $prev =~ /^\D*$/) { $_ = 0+$_ }
 			default { die "Bad: '$_'" }
 		}
 		die "Bad: '$_'" if $nBrackets < 0;
@@ -58,8 +57,6 @@ sub tokenize {
 	}
 	die "Bad: Не хватает аргумента после" if $prev =~ m{^U?[*/^+-]$};
 	die "Bad: Не хватает закрывающих скобок" if $nBrackets;
-
-
 
 	return \@res;
 }
